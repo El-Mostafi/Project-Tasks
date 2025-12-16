@@ -1,0 +1,36 @@
+# Environment variables (contains sensitive data)
+.env
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Backend
+ProjectTasksBackEnd/target/
+ProjectTasksBackEnd/.mvn/
+ProjectTasksBackEnd/mvnw
+ProjectTasksBackEnd/mvnw.cmd
+
+# Frontend
+ProjectTasksFrontEnd/node_modules/
+ProjectTasksFrontEnd/dist/
+ProjectTasksFrontEnd/build/
+ProjectTasksFrontEnd/.env.local
+ProjectTasksFrontEnd/.env.development.local
+ProjectTasksFrontEnd/.env.test.local
+ProjectTasksFrontEnd/.env.production.local
+
+# Docker
+docker-compose.override.yml
+
