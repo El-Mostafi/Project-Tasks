@@ -72,6 +72,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
             {isEdit ? 'Edit Task' : 'Create New Task'}
           </h2>
           <button
+            title='close'
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition"
           >
@@ -110,9 +111,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due Date <span className="text-red-500">*</span>
+              Due Date 
             </label>
             <input
+              title='Due Date'
               type="date"
               value={formData.dueDate}
               onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}

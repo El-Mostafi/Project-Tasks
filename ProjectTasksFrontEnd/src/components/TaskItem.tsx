@@ -9,7 +9,7 @@ interface TaskItemProps {
 }
 
 export default function TaskItem({ task, onToggleComplete, onEdit, onDelete }: TaskItemProps) {
-  const isOverdue = !task.isCompleted && new Date(task.dueDate) < new Date();
+  const isOpenTask = !task.isCompleted && new Date(task.dueDate) < new Date();
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition">
@@ -35,10 +35,10 @@ export default function TaskItem({ task, onToggleComplete, onEdit, onDelete }: T
             </p>
           )}
           <div className="flex items-center mt-2 space-x-2">
-            <Calendar className={`w-4 h-4 ${isOverdue ? 'text-red-500' : 'text-gray-400'}`} />
-            <span className={`text-sm ${isOverdue ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+            <Calendar className={`w-4 h-4 ${isOpenTask ? 'text-red-500' : 'text-gray-400'}`} />
+            <span className={`text-sm ${isOpenTask ? 'text-green-500 font-medium' : 'text-gray-500'}`}>
               {new Date(task.dueDate).toLocaleDateString()}
-              {isOverdue && ' (Overdue)'}
+              {isOpenTask && ' Open Task'}
             </span>
           </div>
         </div>
