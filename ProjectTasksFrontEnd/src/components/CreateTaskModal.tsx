@@ -1,22 +1,37 @@
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { CreateTaskDto, Task, ApiError } from '../types';
-import { handleApiError } from '../utils/errorHandler';
-import ErrorAlert from './ErrorAlert';
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import { CreateTaskDto, Task, ApiError } from "../types";
+import { handleApiError } from "../utils/errorHandler";
+import ErrorAlert from "./ErrorAlert";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: CreateTaskDto | { title: string; description?: string; dueDate: string; completed: boolean }) => Promise<void>;
+  onSave: (
+    data:
+      | CreateTaskDto
+      | {
+          title: string;
+          description?: string;
+          dueDate: string;
+          completed: boolean;
+        }
+  ) => Promise<void>;
   initialData?: Task;
   isEdit?: boolean;
 }
 
-export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, isEdit }: CreateTaskModalProps) {
+export default function CreateTaskModal({
+  isOpen,
+  onClose,
+  onSave,
+  initialData,
+  isEdit,
+}: CreateTaskModalProps) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    dueDate: ''
+    title: "",
+    description: "",
+    dueDate: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -25,11 +40,11 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
     if (initialData) {
       setFormData({
         title: initialData.title,
-        description: initialData.description || '',
-        dueDate: initialData.dueDate
+        description: initialData.description || "",
+        dueDate: initialData.dueDate,
       });
     } else {
-      setFormData({ title: '', description: '', dueDate: '' });
+      setFormData({ title: "", description: "", dueDate: "" });
     }
     setError(null);
   }, [initialData, isOpen]);
@@ -45,13 +60,13 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
           title: formData.title,
           description: formData.description,
           dueDate: formData.dueDate,
-          completed: initialData.isCompleted
+          completed: initialData.isCompleted,
         });
       } else {
         await onSave({
           title: formData.title,
           description: formData.description,
-          dueDate: formData.dueDate
+          dueDate: formData.dueDate,
         });
       }
       onClose();
@@ -65,22 +80,31 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {isEdit ? 'Edit Task' : 'Create New Task'}
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fadeIn"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl w-full max-w-md animate-slideUp mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+            {isEdit ? "Edit Task" : "Create New Task"}
           </h2>
           <button
-            title='close'
+            title="close"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4"
+        >
           <ErrorAlert error={error} onClose={() => setError(null)} />
 
           <div>
@@ -90,7 +114,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter task title"
             />
@@ -102,7 +128,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter task description (optional)"
               rows={3}
@@ -111,31 +139,33 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due Date 
+              Due Date
             </label>
             <input
-              title='Due Date'
+              title="Due Date"
               type="date"
               value={formData.dueDate}
-              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, dueDate: e.target.value })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          <div className="flex space-x-3 pt-4">
+          <div className="flex space-x-2 sm:space-x-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
+              {loading ? "Saving..." : isEdit ? "Update" : "Create"}
             </button>
           </div>
         </form>
@@ -143,4 +173,3 @@ export default function CreateTaskModal({ isOpen, onClose, onSave, initialData, 
     </div>
   );
 }
-

@@ -3,6 +3,7 @@
 Full-stack application for managing projects and tasks with authentication.
 
 ## Tools Used
+
 - **Backend:** Spring Boot 3.5.8 + Java 21
 - **Frontend:** React 18 + TypeScript
 - **Database:** MySQL 8.0
@@ -13,8 +14,13 @@ Full-stack application for managing projects and tasks with authentication.
 ## How to Run with Docker
 
 ```bash
-# 1. Copy environment file
+# 1. Copy environment file and modify variables for your environment
 cp .env.example .env
+# Edit .env file and update the variables according to your specifications:
+# - MYSQL_ROOT_PASSWORD (database root password)
+# - MYSQL_DATABASE (database name)
+# - JWT_SECRET (your secret key for JWT tokens)
+# - Other environment variables as needed
 
 # 2. Start all services
 docker-compose up -d
@@ -46,11 +52,13 @@ npm run dev
 ## Database Setup
 
 Create MySQL database:
+
 ```sql
 CREATE DATABASE project_tasks;
 ```
 
 Configure in `application.properties`:
+
 ```properties
 spring.datasource.username=root
 spring.datasource.password=your_password
@@ -58,9 +66,8 @@ spring.datasource.password=your_password
 
 ## Demo Video
 
-[**Click here to watch the demo**](YOUR_VIDEO_LINK_HERE)
+[**Click here to watch the demo**](VIDEO_LINK)
 
 ---
 
 **Mohamed El Mostafi - Hahn Software Morocco Internship 2026**
-

@@ -5,7 +5,11 @@ WORKDIR /app
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
+# ACCEPT the argument from docker-compose
+ARG VITE_API_URL 
 
+# SET it as an environment variable so Vite can see it
+ENV VITE_API_URL=$VITE_API_URL
 # Copy source code and build
 COPY . .
 RUN npm run build

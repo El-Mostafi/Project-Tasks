@@ -1,4 +1,3 @@
-
 services:
   # MySQL Database
   mysql:
@@ -43,7 +42,15 @@ services:
     networks:
       - project-tasks-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health || exit 1"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8081/actuator/health || exit 1",
+        ]
       timeout: 10s
       retries: 5
       interval: 10s
@@ -54,6 +61,8 @@ services:
     build:
       context: ./ProjectTasksFrontEnd
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     container_name: project-tasks-frontend
     restart: unless-stopped
     ports:
@@ -62,8 +71,25 @@ services:
       - backend
     networks:
       - project-tasks-network
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: project-tasks-phpmyadmin
+    restart: unless-stopped
     environment:
-      VITE_API_URL: ${VITE_API_URL}
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8082:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - project-tasks-network
 
 volumes:
   mysql_data:
@@ -72,4 +98,3 @@ volumes:
 networks:
   project-tasks-network:
     driver: bridge
-

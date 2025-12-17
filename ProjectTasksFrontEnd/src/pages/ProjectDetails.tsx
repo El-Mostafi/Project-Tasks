@@ -1,17 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, ArrowLeft, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import TaskItem from '../components/TaskItem';
-import CreateProjectModal from '../components/CreateProjectModal';
-import CreateTaskModal from '../components/CreateTaskModal';
-import ErrorAlert from '../components/ErrorAlert';
-import Toast from '../components/Toast';
-import { projectsService } from '../services/projects';
-import { tasksService } from '../services/tasks';
-import { Project, Task, CreateProjectDto, CreateTaskDto, ApiError } from '../types';
-import { handleApiError, formatApiError, getErrorPagePath } from '../utils/errorHandler';
-import { useToast } from '../hooks/useToast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  ArrowLeft,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import Navbar from "../components/Navbar";
+import TaskItem from "../components/TaskItem";
+import CreateProjectModal from "../components/CreateProjectModal";
+import CreateTaskModal from "../components/CreateTaskModal";
+import ConfirmationModal from "../components/ConfirmationModal";
+import ErrorAlert from "../components/ErrorAlert";
+import Toast from "../components/Toast";
+import { projectsService } from "../services/projects";
+import { tasksService } from "../services/tasks";
+import {
+  Project,
+  Task,
+  CreateProjectDto,
+  CreateTaskDto,
+  ApiError,
+} from "../types";
+import {
+  handleApiError,
+  formatApiError,
+  getErrorPagePath,
+} from "../utils/errorHandler";
+import { useToast } from "../hooks/useToast";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
@@ -25,11 +45,17 @@ export default function ProjectDetails() {
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [error, setError] = useState<ApiError | null>(null);
   const { toast, showSuccess, showError, hideToast } = useToast();
+  const [isDeleteProjectModalOpen, setIsDeleteProjectModalOpen] =
+    useState(false);
+  const [isDeleteTaskModalOpen, setIsDeleteTaskModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [completedFilter, setCompletedFilter] = useState<boolean | undefined>(undefined);
-  const [dueDateFrom, setDueDateFrom] = useState('');
-  const [dueDateTo, setDueDateTo] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [completedFilter, setCompletedFilter] = useState<boolean | undefined>(
+    undefined
+  );
+  const [dueDateFrom, setDueDateFrom] = useState("");
+  const [dueDateTo, setDueDateTo] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const [page, setPage] = useState(0);
@@ -72,7 +98,7 @@ export default function ProjectDetails() {
         query: searchQuery,
         completed: completedFilter,
         dueDateFrom,
-        dueDateTo
+        dueDateTo,
       });
       setTasks(response.content);
       setTotalPages(response.totalPages);
@@ -88,19 +114,17 @@ export default function ProjectDetails() {
   const handleUpdateProject = async (data: CreateProjectDto) => {
     await projectsService.updateProject(Number(id), data);
     loadProject();
-    showSuccess('Project updated successfully!');
+    showSuccess("Project updated successfully!");
   };
 
   const handleDeleteProject = async () => {
-    if (window.confirm('Are you sure you want to delete this project? All tasks will be deleted.')) {
-      try {
-        await projectsService.deleteProject(Number(id));
-        showSuccess('Project deleted successfully!');
-        setTimeout(() => navigate('/projects'), 1000);
-      } catch (err) {
-        const apiError = handleApiError(err);
-        showError(formatApiError(apiError));
-      }
+    try {
+      await projectsService.deleteProject(Number(id));
+      showSuccess("Project deleted successfully!");
+      setTimeout(() => navigate("/projects"), 1000);
+    } catch (err) {
+      const apiError = handleApiError(err);
+      showError(formatApiError(apiError));
     }
   };
 
@@ -109,16 +133,28 @@ export default function ProjectDetails() {
     setPage(0);
     loadTasks();
     loadProject();
-    showSuccess('Task created successfully!');
+    showSuccess("Task created successfully!");
   };
 
-  const handleUpdateTask = async (data: CreateTaskDto | { title: string; description?: string; dueDate: string; completed: boolean }) => {
+  const handleUpdateTask = async (
+    data:
+      | CreateTaskDto
+      | {
+          title: string;
+          description?: string;
+          dueDate: string;
+          completed: boolean;
+        }
+  ) => {
     if (editingTask) {
-      const updateData = 'completed' in data ? data : { ...data, completed: editingTask.isCompleted };
+      const updateData =
+        "completed" in data
+          ? data
+          : { ...data, completed: editingTask.isCompleted };
       await tasksService.updateTask(editingTask.id, updateData);
       loadTasks();
       loadProject();
-      showSuccess('Task updated successfully!');
+      showSuccess("Task updated successfully!");
     }
   };
 
@@ -127,7 +163,7 @@ export default function ProjectDetails() {
       await tasksService.toggleComplete(taskId);
       loadTasks();
       loadProject();
-      showSuccess('Task status updated!');
+      showSuccess("Task status updated!");
     } catch (err) {
       const apiError = handleApiError(err);
       showError(formatApiError(apiError));
@@ -135,16 +171,22 @@ export default function ProjectDetails() {
   };
 
   const handleDeleteTask = async (taskId: number) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    setTaskToDelete(taskId);
+    setIsDeleteTaskModalOpen(true);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (taskToDelete) {
       try {
-        await tasksService.deleteTask(taskId);
+        await tasksService.deleteTask(taskToDelete);
         loadTasks();
         loadProject();
-        showSuccess('Task deleted successfully!');
+        showSuccess("Task deleted successfully!");
       } catch (err) {
         const apiError = handleApiError(err);
         showError(formatApiError(apiError));
       }
+      setTaskToDelete(null);
     }
   };
 
@@ -154,10 +196,10 @@ export default function ProjectDetails() {
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setCompletedFilter(undefined);
-    setDueDateFrom('');
-    setDueDateTo('');
+    setDueDateFrom("");
+    setDueDateTo("");
     setPage(0);
   };
 
@@ -176,28 +218,31 @@ export default function ProjectDetails() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <button
-          onClick={() => navigate('/projects')}
-          className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-6"
+          onClick={() => navigate("/projects")}
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4 sm:mb-6 text-sm sm:text-base"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Back to Projects</span>
         </button>
 
         <ErrorAlert error={error} onClose={() => setError(null)} />
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-start justify-between">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{project.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+                {project.title}
+              </h1>
               {project.description && (
                 <p className="text-gray-600 mb-4">{project.description}</p>
               )}
 
               <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
                 <span>
-                  {project.completedTasks} / {project.totalTasks} tasks completed
+                  {project.completedTasks} / {project.totalTasks} tasks
+                  completed
                 </span>
                 <span className="font-semibold text-blue-600">
                   {project.progressPercentage.toFixed(0)}% complete
@@ -212,42 +257,44 @@ export default function ProjectDetails() {
               </div>
             </div>
 
-            <div className="flex space-x-2 ml-6">
+            <div className="flex space-x-2">
               <button
                 onClick={() => setIsEditModalOpen(true)}
                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
               >
-                <Edit className="w-5 h-5" />
+                <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
-                onClick={handleDeleteProject}
+                onClick={() => setIsDeleteProjectModalOpen(true)}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">Tasks</h2>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+              Tasks
+            </h2>
             <button
               onClick={() => {
                 setEditingTask(undefined);
                 setIsTaskModalOpen(true);
               }}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+              className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm sm:text-base"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Add Task</span>
             </button>
           </div>
 
-          <div className="mb-6 space-y-4">
-            <div className="flex items-center space-x-4">
+          <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -256,14 +303,14 @@ export default function ProjectDetails() {
                     setPage(0);
                   }}
                   placeholder="Search tasks..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm sm:text-base"
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Filters</span>
               </button>
             </div>
@@ -276,9 +323,17 @@ export default function ProjectDetails() {
                       Status
                     </label>
                     <select
-                      value={completedFilter === undefined ? '' : completedFilter.toString()}
+                      value={
+                        completedFilter === undefined
+                          ? ""
+                          : completedFilter.toString()
+                      }
                       onChange={(e) => {
-                        setCompletedFilter(e.target.value === '' ? undefined : e.target.value === 'true');
+                        setCompletedFilter(
+                          e.target.value === ""
+                            ? undefined
+                            : e.target.value === "true"
+                        );
                         setPage(0);
                       }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -336,7 +391,9 @@ export default function ProjectDetails() {
             </div>
           ) : tasks.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No tasks yet. Add your first task!</p>
+              <p className="text-gray-500 text-lg">
+                No tasks yet. Add your first task!
+              </p>
             </div>
           ) : (
             <>
@@ -364,7 +421,7 @@ export default function ProjectDetails() {
                   </button>
 
                   <span className="text-gray-600">
-                    Page {page + 1} of {totalPages}
+                    {page + 1}/{totalPages}
                   </span>
 
                   <button
@@ -401,12 +458,29 @@ export default function ProjectDetails() {
         isEdit={!!editingTask}
       />
 
+      <ConfirmationModal
+        isOpen={isDeleteProjectModalOpen}
+        onClose={() => setIsDeleteProjectModalOpen(false)}
+        onConfirm={handleDeleteProject}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${project.title}"? This will permanently delete the project and all its tasks. This action cannot be undone.`}
+        confirmText="Delete Project"
+      />
+
+      <ConfirmationModal
+        isOpen={isDeleteTaskModalOpen}
+        onClose={() => {
+          setIsDeleteTaskModalOpen(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={confirmDeleteTask}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete Task"
+      />
+
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={hideToast}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
       )}
     </div>
   );
